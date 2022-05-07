@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "preact/hooks";
+import { FunctionComponent, JSX } from "preact";
+import { useEffect, useState } from "preact/hooks";
 import { initHangmanGame } from "./lib/useHangman";
 import { initHangmanAi } from "./lib/useHangmanAI";
 import { Awords } from "./data/Aword";
@@ -9,22 +10,47 @@ import { Zwords } from "./data/Zword";
 const randomWord = (words: string[]) => words[Math.floor(Math.random() * words.length)]
 
 export function App() {
-  let wordList = Cwords
+  let wordList = [...Cwords, ...Awords, ...Bwords, ...Zwords]
 
-  const [hangmanWord, setHangmanword] = useState(randomWord(wordList))
-  const { start } = initHangmanGame();
+  const { start, on } = initHangmanGame();
   const { getAIGuess } = initHangmanAi(wordList);
-  const [hangmanGame, setHangmanGame] = useState(start(hangmanWord))
+
+  const [message, setMessage] = useState<null | JSX.Element>(null);
+  const [hangmanGame, setHangmanGame] = useState(start(randomWord(wordList)))
 
   useEffect(() => {
-    console.log(hangmanWord)
-    // console.log(hangmanGame.word)
-  }, [hangmanGame])
+    on("win", (w, game) => {
+      setMessage(<div>
+        <span >Game won!</span>
+        <Button
+          onClick={() => {
+            setHangmanGame(start(randomWord(wordList)));
+            setMessage(null);
+          }}
+        >New Game</Button>
+      </div>)
+    });
+    on("loss", (w, game) => {
+      setMessage(<div>
+        <span >Game lost! The word was is {w}.</span>
+        <Button
+          onClick={() => {
+            setHangmanGame(start(randomWord(wordList)));
+            setMessage(null);
+          }}
+        >New Game</Button>
+      </div>)
+    });
+
+  }, []);
 
   return (
     <div className="w-full h-full bg-slate-700 text-red-100">
       <header>
         <h1 className="text-center text-4xl p-2">Hangman</h1>
+        <div className="w-full flex justify-center">
+          {message}
+        </div>
         <span>
           {JSON.stringify(hangmanGame.guesses)}
         </span>
@@ -39,27 +65,28 @@ export function App() {
           ))}
         </div>
         <div class="flex pt-4 justify-evenly">
-          <button
-            class="border-2 border-black bg-slate-400 text-slate-900 p-6 block mx-auto"
+          <Button
             onClick={() => {
               let g = String(prompt("GUESS Pls"));
-              // if (g.length !== 1) return alert("Bad try again!")
-
               setHangmanGame(hangmanGame.guess(g));
             }}
-          >Player</button>
-          <button
-            class="border-2 border-black bg-slate-400 text-slate-900 p-6 block mx-auto"
+          >Player</Button>
+          <Button
             onClick={() => {
               let g = getAIGuess(hangmanGame);
               setHangmanGame(hangmanGame.guess(g));
             }}
-          >AI</button>
-          </div>
-        <button
-          onClick={() => setHangmanGame(start(randomWord(wordList)))}
-        >New Game</button>
+          >AI</Button>
+        </div>
       </main>
     </div>
   )
 }
+
+
+const Button: FunctionComponent<JSX.HTMLAttributes<HTMLButtonElement>> = ({ children, ...props }) => (
+  <button
+    className="border-2 border-green-900 text-slate-50 mx-2 p-2 rounded-md bg-slate-600"
+    {...props}
+  >{children}</button>
+)

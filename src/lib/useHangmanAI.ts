@@ -24,9 +24,7 @@ export const initHangmanAi = (words: string[]) => {
             return true;
         })
 
-        letters = getMostPrevelentLetters(g_words)
-
-        console.log(g_words)
+        letters = getMostPrevelentLetters(g_words);
 
         if (g_words.length === 1) return g_words[0];
 
