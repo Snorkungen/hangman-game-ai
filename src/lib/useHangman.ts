@@ -23,7 +23,7 @@ export const initHangmanGame = ({ lives }: options = {}) => {
 
     class Game {
         private hangmanWord = "";
-        private lives = Number(DEFAULT_OPTIONS.lives);
+        private lives = Number(lives);
         public word: (string | null)[] = [];
         public guesses: string[] = [];
 
