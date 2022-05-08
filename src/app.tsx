@@ -26,7 +26,7 @@ let hangmanLines = [
 
 export function App() {
   let wordList = [...Cwords, ...Awords, ...Bwords, ...Zwords]
-  
+
   const { start, on } = initHangmanGame({ lives: hangmanLines.length });
   const { getAIGuess } = initHangmanAi(wordList);
 
@@ -60,14 +60,18 @@ export function App() {
   }, []);
 
   return (
-    <div className="w-full h-full bg-slate-700 text-red-100">
+    <div className="w-full h-full bg-slate-700 text-red-100 overflow-auto">
       <header>
         <h1 className="text-center text-4xl p-2">Hangman</h1>
         <div className="w-full flex justify-center">
           {message}
         </div>
-        <span>
-        </span>
+        <Button
+          onClick={() => {
+            let g = getAIGuess(hangmanGame);
+            setHangmanGame(hangmanGame.guess(g));
+          }}
+        >AI</Button>
       </header>
       <main>
         <div>
@@ -81,27 +85,17 @@ export function App() {
             </text>
           </svg>
         </div>
-        <div className="flex justify-center gap-2">
+        <div className="flex justify-center flex-wrap gap-2">
           {hangmanGame.word.map((letter, i) => (
             <div key={`${letter}-${i}`} className="w-20 h-20 bg-slate-500 flex justify-center items-center text-4xl">
               <span>{letter}</span>
             </div>
           ))}
         </div>
-        <div class="flex pt-4 justify-evenly">
-          <Button
-            onClick={() => {
-              let g = String(prompt("GUESS Pls"));
-              setHangmanGame(hangmanGame.guess(g));
-            }}
-          >Player</Button>
-          <Button
-            onClick={() => {
-              let g = getAIGuess(hangmanGame);
-              setHangmanGame(hangmanGame.guess(g));
-            }}
-          >AI</Button>
-        </div>
+        <hr />
+        <Keyboard onKeyPress={(key) => {
+          setHangmanGame(hangmanGame.guess(key));
+        }} />
       </main>
     </div>
   )
@@ -114,3 +108,17 @@ const Button: FunctionComponent<JSX.HTMLAttributes<HTMLButtonElement>> = ({ chil
     {...props}
   >{children}</button>
 );
+
+const Keyboard: FunctionComponent<{ onKeyPress: (key: string) => void }> = ({ onKeyPress }) => {
+  const keys = (new Array(26)).fill(0).map((_, i) => String.fromCharCode(65 + i));
+
+  return (
+    <div className="flex flex-row flex-wrap justify-evenly m-5">
+      {keys.map((key) => (
+        <Button
+          onClick={() => onKeyPress(key)}
+        > {key}</Button>
+      ))}
+    </div>
+  )
+}
